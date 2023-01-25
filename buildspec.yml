@@ -16,7 +16,7 @@ phases:
       - echo Working on branch=\'$BRANCH_NAME\' and version=\'$PROJECT_VERSION\'
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -f Dockerfile.prod -t thislocal/microapp .
+      - docker build -f Dockerfile -t thislocal/microapp .
       - echo Done! Build completed on `date`.
       - echo Running unit tests...
       - docker run -it thislocal/microapp python test.py
