@@ -4,3 +4,4 @@ test_case.txt
 test_client.py
 *.bat
 *.sh
+!show_version.sh

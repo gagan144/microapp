@@ -13,7 +13,7 @@ phases:
     commands:
       - export BRANCH_NAME=$(git branch --show-current)
       - export GIT_COMMIT_HASH=$(git rev-parse --short HEAD)
-      - export APP_VERSION=$(grep -o '\"version\": \"[^\"]*' version.json | grep -o '[^"]*$')
+      - export APP_VERSION=$(./show_version.sh)
       - export IMAGE_TAG=$APP_VERSION-$GIT_COMMIT_HASH
       - echo Working on branch=\'$BRANCH_NAME\'\, git commit hash=\'$GIT_COMMIT_HASH\'\, and app version=\'$IMAGE_TAG\'
       - echo Build started on `date`
