@@ -40,7 +40,7 @@ PORT = int(os.getenv('APP_PORT', '7000'))
 
 
 # Globals
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 APP_ID = "microapp"
 WORKER_ID = str(uuid.uuid4())[:8]
 STARTED_ON = datetime.utcnow()
