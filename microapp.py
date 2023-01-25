@@ -37,10 +37,12 @@ if len(logger.handlers) == 0:
 
 # Get Environment variables
 PORT = int(os.getenv('APP_PORT', '7000'))
+APP_SECRET_TOKEN = str(os.getenv('APP_SECRET_TOKEN', 'secret'))
 
 
 # Globals
-VERSION = "1.0.1"
+with open("version.json", "r") as f:
+    VERSION = json.loads(f.read())["version"]
 APP_ID = "microapp"
 WORKER_ID = str(uuid.uuid4())[:8]
 STARTED_ON = datetime.utcnow()
@@ -146,6 +148,7 @@ def health():
 
 
 class LoadtestPostData(BaseModel):
+    secret_token: str
     handle_id: str
     metadata: Optional[dict] = None
     duration_s: int
@@ -158,10 +161,19 @@ async def load_test(postdata: LoadtestPostData):
     API to load the miscroservice
     """
 
+    # Authentication
+    secret_token = postdata.secret_token
+    if secret_token != APP_SECRET_TOKEN:
+        return JSONResponse({
+            "status": "authentication_failure",
+            "message": "Authentication Failed! Please provide a valid secret token."
+        }, status_code=401)
+
     _start_time = time.time()
 
     # Gather variables
     job_id = str(uuid.uuid4()).replace("-","")
+
     duration_s = postdata.duration_s
     target_load = postdata.target_load
     memory_mb = max( min(postdata.memory_mb, 1000), 1)
@@ -229,4 +241,5 @@ logger.info(f"Worker={WORKER_ID} - Service Ready!")
 if __name__ == "__main__":
     import uvicorn
     print("Running server from python main...")
+    print(f"App secret token='{APP_SECRET_TOKEN}'")
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_config="log_config.json")

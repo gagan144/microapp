@@ -9,7 +9,7 @@ A python based micro app for testing
 
 - Run
     ```shell
-    docker run --name microapp_test -p 9001:7000 -d metaoptima/microapp
+    docker run --name microapp_test -e APP_SECRET_TOKEN=my-secret -p 9001:7000 -d metaoptima/microapp
     ```
 
 - Login inside the container
@@ -21,7 +21,14 @@ A python based micro app for testing
     ```shell
     docker run -it metaoptima/microapp python test.py
     ```
-  
+
+## Environment Variables
+```
+APP_SECRET_TOKEN='<some-secret-token>'
+
+# Optional
+APP_PORT=8111
+```
 
 ## Sample Test Case
 
@@ -29,6 +36,7 @@ A python based micro app for testing
   - Test Case 1
     ```json
     {
+      "secret_token": "secret",
       "handle_id": "test-0001",
       "metadata": {
         "some-key": "some-val"
@@ -41,6 +49,7 @@ A python based micro app for testing
   - Test Case 2
     ```json
     {
+      "secret_token": "secret",
       "handle_id": "test-0002",
       "metadata": {},
       "duration_s": 20,

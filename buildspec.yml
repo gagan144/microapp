@@ -12,8 +12,10 @@ phases:
   build:
     commands:
       - export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-      - export PROJECT_VERSION=$(git rev-parse --short HEAD)
-      - echo Working on branch=\'$BRANCH_NAME\' and version=\'$PROJECT_VERSION\'
+      - export GIT_COMMIT_HASH=$(git rev-parse --short HEAD)
+      - export APP_VERSION=$(grep -o '"version": "[^"]*' version.json | grep -o '[^"]*$')
+      - export IMAGE_TAG=$APP_VERSION-$GIT_COMMIT_HASH
+      - echo Working on branch=\'$BRANCH_NAME\'\, git commit hash=\'$GIT_COMMIT_HASH\'\, and app version=\'$IMAGE_TAG\'
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -f Dockerfile -t thislocal/microapp .
@@ -26,7 +28,7 @@ phases:
       - echo Pushing the Docker image to \'$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME\' ...
       - docker tag thislocal/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-      - docker tag thislocal/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PROJECT_VERSION
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PROJECT_VERSION
+      - docker tag thislocal/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo Done! Docker image successfully pushed to repository.
       - echo Completed! Build process completed on `date`.

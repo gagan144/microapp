@@ -158,6 +158,7 @@ class TestLoadtestService(unittest.TestCase):
         """
 
         payload = {
+            "secret_token": "secret",
             "handle_id": "py-test-0001",
             "metadata": {
                 "some-key": "some-value"
