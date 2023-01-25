@@ -11,7 +11,7 @@ phases:
       - echo Done! Successfully logged in to Amazon ECR.
   build:
     commands:
-      - export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+      - export BRANCH_NAME=$(git branch --show-current)
       - export GIT_COMMIT_HASH=$(git rev-parse --short HEAD)
       - export APP_VERSION=$(grep -o '"version": "[^"]*' version.json | grep -o '[^"]*$')
       - export IMAGE_TAG=$APP_VERSION-$GIT_COMMIT_HASH
