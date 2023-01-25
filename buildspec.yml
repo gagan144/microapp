@@ -1,0 +1,31 @@
+# AWS CodeBuild Specification file
+# This file specify instructions to build the image and
+# push it to Amazon ECR repository
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo Done! Successfully logged in to Amazon ECR.
+  build:
+    commands:
+      - export BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+      - export PROJECT_VERSION=$(git rev-parse --short HEAD)
+      - echo Working on branch=\'$BRANCH_NAME\' and version=\'$PROJECT_VERSION\'
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -f Dockerfile.prod -t metaoptima/microapp .
+      - echo Done! Build completed on `date`.
+      - echo Running unit tests...
+      - docker run -it metaoptima/microapp python test.py
+  post_build:
+    commands:
+      - echo Pushing the Docker image to \'$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME\' ...
+      - docker tag metaoptima/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - docker tag metaoptima/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PROJECT_VERSION
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$PROJECT_VERSION
+      - echo Done! Docker image successfully pushed to repository.
+      - echo Completed! Build process completed on `date`.
