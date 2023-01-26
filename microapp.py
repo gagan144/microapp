@@ -131,6 +131,7 @@ def health():
 
     return JSONResponse({
         "status": "ok",
+        "worker_id": WORKER_ID,
         "datetime": datetime.utcnow().strftime(FORMAT_UTC_DATETIME),
         "memory": {
             "total_mb": round(mem_info.total / (1024 ** 2)),
