@@ -15,32 +15,32 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo Done! Successfully logged in to Amazon ECR.
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - BRANCH_NAME=$(git branch --show-current)
+      - GIT_COMMIT_HASH=$(git rev-parse --short HEAD)
+      - APP_VERSION=$(./show_version.sh)
+      - IMAGE_TAG=$APP_VERSION-$GIT_COMMIT_HASH
   build:
     commands:
-      - export BRANCH_NAME=$(git branch --show-current)
-      - export GIT_COMMIT_HASH=$(git rev-parse --short HEAD)
-      - export APP_VERSION=$(./show_version.sh)
-      - export IMAGE_TAG=$APP_VERSION-$GIT_COMMIT_HASH
       - echo Working on branch=\'$BRANCH_NAME\'\, git commit hash=\'$GIT_COMMIT_HASH\'\, and app version=\'$IMAGE_TAG\'
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -f Dockerfile -t thislocal/microapp .
+      - docker build -f Dockerfile -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
       - echo Done! Build completed on `date`.
 #      - echo Running unit tests...
-#      - docker run -it thislocal/microapp python test.py
+#      - docker run -it $REPOSITORY_URI:latest python test.py
   post_build:
     commands:
       - bash -c "if [ /"$CODEBUILD_BUILD_SUCCEEDING/" == /"0/" ]; then exit 1; fi"
-      - echo Pushing the Docker image to \'$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME\' ...
-      - docker tag thislocal/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-      - docker tag thislocal/microapp $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - echo Done! Docker image successfully pushed to repository.
-      - echo Completed! Build process completed on `date`.
+      - echo Pushing the docker images to \'$REPOSITORY_URI\' ...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Done! Docker images successfully pushed to the repository.
       # Generate artifact (Used by AWS Pipeline deploy stage); name should be the name of the container specified in the task definition
       - echo Writing image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' $TASK_DEF_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' $TASK_DEF_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Completed! Build process completed on `date`.
 
 artifacts:
     files: imagedefinitions.json

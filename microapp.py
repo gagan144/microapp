@@ -159,7 +159,7 @@ class LoadtestPostData(BaseModel):
 @app.post("/load-test")
 async def load_test(postdata: LoadtestPostData):
     """
-    API to load the microservice
+    API to load test the microservice.
     """
 
     # Authentication
