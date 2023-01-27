@@ -19,4 +19,4 @@ RUN mkdir logs
 ENV APP_PORT=7000
 
 # Run server
-CMD uvicorn microapp:app --host=0.0.0.0 --port=$APP_PORT --workers=3 --log-config=log_config.json --timeout-keep-alive=10
+CMD uvicorn microapp:app --host=0.0.0.0 --port=$APP_PORT --workers=3 --log-config=log_config.json --timeout-keep-alive=3600
