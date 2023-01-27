@@ -32,3 +32,8 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo Done! Docker image successfully pushed to repository.
       - echo Completed! Build process completed on `date`.
+      # Generate artifact (Used by AWS Pipeline deploy stage)
+      - printf '[{"name":"%s","imageUri":"%s"}]' $TASK_DEF_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+    files: imagedefinitions.json
