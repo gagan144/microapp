@@ -1,6 +1,12 @@
 # AWS CodeBuild Specification file
 # This file specify instructions to build the image and
 # push it to Amazon ECR repository
+# Environment variables for building:
+# - AWS_DEFAULT_REGION
+# - AWS_ACCOUNT_ID
+# - IMAGE_REPO_NAME
+# - TASK_DEF_NAME
+
 version: 0.2
 
 phases:
@@ -32,7 +38,8 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo Done! Docker image successfully pushed to repository.
       - echo Completed! Build process completed on `date`.
-      # Generate artifact (Used by AWS Pipeline deploy stage)
+      # Generate artifact (Used by AWS Pipeline deploy stage); name should be the name of the container specified in the task definition
+      - echo Writing image definitions file...
       - printf '[{"name":"%s","imageUri":"%s"}]' $TASK_DEF_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
