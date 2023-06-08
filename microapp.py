@@ -15,6 +15,7 @@ from datetime import datetime
 import psutil
 import re
 import uuid
+import requests
 import logging
 from pydantic import BaseModel
 from typing import Optional
@@ -59,6 +60,18 @@ def get_ip_address():
     except:
         return None
 
+def get_processor_freq_hz():
+    try:
+        return psutil.cpu_freq().current / 1000
+    except:
+        return None
+
+def check_internet(url: str='http://www.google.com/', timeout_sec: int=5) -> bool:
+    try:
+        _ = requests.head(url, timeout=timeout_sec)
+        return True
+    except requests.ConnectionError:
+        return False
 # ----- /Helpers -----
 
 
@@ -109,7 +122,7 @@ def index():
                 "arch": platform.machine(),
                 "processor": platform.processor(),
                 "n_processors": psutil.cpu_count(),
-                "processor_freq_ghz": psutil.cpu_freq().current/1000,
+                "processor_freq_ghz": get_processor_freq_hz(),
                 "memory_mb": round(psutil.virtual_memory().total / (1024.0 **2)),
                 "mac_address": ':'.join(re.findall('..', '%012x' % uuid.getnode())),
                 "os": platform.system(),
@@ -144,7 +157,8 @@ def health():
 
             # load over the last 1, 5 and 15 minutes
             "average_load_perc": [(x / psutil.cpu_count() * 100) for x in psutil.getloadavg()]
-        }
+        },
+        "has_internet_connection": check_internet()
     })
 
 
