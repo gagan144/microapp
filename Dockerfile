@@ -1,6 +1,7 @@
 FROM python:3.6-slim
 
 # Install linux dependencies
+RUN apt update && apt install -y gcc
 #RUN apt update && apt --yes install build-essential cmake libgtk-3-dev libboost-all-dev && apt clean && rm -rf /tmp/* /var/tmp/*
 
 # Set working directory
